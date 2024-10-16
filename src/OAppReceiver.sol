@@ -68,7 +68,7 @@ abstract contract OAppReceiver is IOAppReceiver, OAppCore {
     function allowInitializePath(
         Origin calldata origin
     ) public view virtual returns (bool) {
-        return peers[origin.srcEid] == origin.sender;
+        return _getOAppCoreStorage().peers[origin.srcEid] == origin.sender;
     }
 
     /**
@@ -110,7 +110,8 @@ abstract contract OAppReceiver is IOAppReceiver, OAppCore {
         bytes calldata _extraData
     ) public payable virtual {
         // Ensures that only the endpoint can attempt to lzReceive() messages to this OApp.
-        if (address(endpoint) != msg.sender) revert OnlyEndpoint(msg.sender);
+        if (address(_getOAppCoreStorage().endpoint) != msg.sender)
+            revert OnlyEndpoint(msg.sender);
 
         // Ensure that the sender matches the expected peer for the source endpoint.
         if (_getPeerOrRevert(_origin.srcEid) != _origin.sender)

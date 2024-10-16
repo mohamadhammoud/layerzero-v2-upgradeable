@@ -7,6 +7,48 @@ import {IMessagingComposer} from "./IMessagingComposer.sol";
 import {IMessagingChannel} from "./IMessagingChannel.sol";
 import {IMessagingContext} from "./IMessagingContext.sol";
 
+/// @notice Struct for specifying message parameters for sending messages across chains.
+/// @param dstEid The destination environment ID (chain ID).
+/// @param receiver The address of the receiver on the destination chain.
+/// @param message The actual message payload.
+/// @param options Additional options for the message, such as settings for gas or security.
+/// @param payInLzToken Boolean indicating whether to pay fees in LayerZero (LZ) tokens or native tokens.
+struct MessagingParams {
+    uint32 dstEid;
+    bytes32 receiver;
+    bytes message;
+    bytes options;
+    bool payInLzToken;
+}
+
+/// @notice Struct for storing details about a sent message receipt.
+/// @param guid A globally unique identifier (GUID) for the message.
+/// @param nonce The nonce associated with the message.
+/// @param fee The fees (native and LZ token fees) associated with the message.
+struct MessagingReceipt {
+    bytes32 guid;
+    uint64 nonce;
+    MessagingFee fee;
+}
+
+/// @notice Struct for specifying the fees associated with sending a message.
+/// @param nativeFee The fee paid in the native token for sending the message.
+/// @param lzTokenFee The fee paid in LayerZero (LZ) tokens for sending the message.
+struct MessagingFee {
+    uint256 nativeFee;
+    uint256 lzTokenFee;
+}
+
+/// @notice Struct for specifying the origin details of a message.
+/// @param srcEid The source environment ID (chain ID) from which the message originates.
+/// @param sender The address of the sender on the source chain.
+/// @param nonce The nonce associated with the message.
+struct Origin {
+    uint32 srcEid;
+    bytes32 sender;
+    uint64 nonce;
+}
+
 /// @title ILayerZeroEndpointV2 Interface for LayerZero Endpoint
 /// @notice This interface handles message sending, receiving, and verification in the LayerZero V2 protocol. It manages fees, options, and library integrations.
 /// @dev Extends multiple interfaces to cover message management, composing, and context within LayerZero.
@@ -16,48 +58,6 @@ interface ILayerZeroEndpointV2 is
     IMessagingChannel,
     IMessagingContext
 {
-    /// @notice Struct for specifying message parameters for sending messages across chains.
-    /// @param dstEid The destination environment ID (chain ID).
-    /// @param receiver The address of the receiver on the destination chain.
-    /// @param message The actual message payload.
-    /// @param options Additional options for the message, such as settings for gas or security.
-    /// @param payInLzToken Boolean indicating whether to pay fees in LayerZero (LZ) tokens or native tokens.
-    struct MessagingParams {
-        uint32 dstEid;
-        bytes32 receiver;
-        bytes message;
-        bytes options;
-        bool payInLzToken;
-    }
-
-    /// @notice Struct for storing details about a sent message receipt.
-    /// @param guid A globally unique identifier (GUID) for the message.
-    /// @param nonce The nonce associated with the message.
-    /// @param fee The fees (native and LZ token fees) associated with the message.
-    struct MessagingReceipt {
-        bytes32 guid;
-        uint64 nonce;
-        MessagingFee fee;
-    }
-
-    /// @notice Struct for specifying the fees associated with sending a message.
-    /// @param nativeFee The fee paid in the native token for sending the message.
-    /// @param lzTokenFee The fee paid in LayerZero (LZ) tokens for sending the message.
-    struct MessagingFee {
-        uint256 nativeFee;
-        uint256 lzTokenFee;
-    }
-
-    /// @notice Struct for specifying the origin details of a message.
-    /// @param srcEid The source environment ID (chain ID) from which the message originates.
-    /// @param sender The address of the sender on the source chain.
-    /// @param nonce The nonce associated with the message.
-    struct Origin {
-        uint32 srcEid;
-        bytes32 sender;
-        uint64 nonce;
-    }
-
     /// @notice Emitted when a packet is sent.
     /// @param encodedPayload The payload of the packet that was sent.
     /// @param options Additional options included in the packet (e.g., gas settings).
