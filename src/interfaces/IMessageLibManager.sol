@@ -2,21 +2,21 @@
 
 pragma solidity >=0.8.0;
 
+/// @notice Struct for defining configuration parameters for an OApp.
+/// @dev Each OApp can have different configurations depending on the chain or environment it operates in.
+/// @param eid The environment ID (chain ID) for which the configuration is applied.
+/// @param configType The type of configuration, which could represent various settings like gas limits, fees, etc.
+/// @param config The actual configuration data encoded in bytes format.
+struct SetConfigParam {
+    uint32 eid;
+    uint32 configType;
+    bytes config;
+}
+
 /// @title IMessageLibManager Interface for LayerZero V2
 /// @notice This contract manages the registration and use of messaging libraries for sending and receiving messages across multiple chains in LayerZero V2.
 /// @dev Libraries handle the sending and receiving of messages between chains (environments) identified by their environment ID (eid).
 interface IMessageLibManager {
-    /// @notice Struct for defining configuration parameters for an OApp.
-    /// @dev Each OApp can have different configurations depending on the chain or environment it operates in.
-    /// @param eid The environment ID (chain ID) for which the configuration is applied.
-    /// @param configType The type of configuration, which could represent various settings like gas limits, fees, etc.
-    /// @param config The actual configuration data encoded in bytes format.
-    struct SetConfigParam {
-        uint32 eid;
-        uint32 configType;
-        bytes config;
-    }
-
     /// @notice Struct for storing the timeout details of a receive library.
     /// @param lib The address of the library handling the receiving of messages.
     /// @param expiry The expiration timestamp for this library's validity.

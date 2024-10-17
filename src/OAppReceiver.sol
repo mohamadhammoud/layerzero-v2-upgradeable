@@ -57,6 +57,17 @@ abstract contract OAppReceiver is IOAppReceiver, OAppCore {
     }
 
     /**
+     * @notice Retrieves the address responsible for 'sending' composeMsg's to the Endpoint.
+     * @return sender The address responsible for 'sending' composeMsg's to the Endpoint.
+     *
+     * @dev Applications can optionally choose to implement a separate composeMsg sender that is NOT the bridging layer.
+     * @dev The default sender IS the OApp implementer.
+     */
+    function composeMsgSender() public view virtual returns (address sender) {
+        return address(this);
+    }
+
+    /**
      * @notice Checks if the path initialization is allowed based on the provided origin.
      * @param origin The origin information containing the source endpoint and sender address.
      * @return Whether the path has been initialized.

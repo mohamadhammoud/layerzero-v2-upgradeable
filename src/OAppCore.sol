@@ -41,6 +41,30 @@ abstract contract OAppCore is IOAppCore, Initializable, OwnableUpgradeable {
     }
 
     /**
+     * @dev Implements the `endpoint()` function from IOAppCore.
+     *      Returns the stored LayerZero endpoint instance.
+     * @return iEndpoint The LayerZero endpoint contract.
+     */
+    function endpoint()
+        public
+        view
+        override
+        returns (ILayerZeroEndpointV2 iEndpoint)
+    {
+        return _getOAppCoreStorage().endpoint;
+    }
+
+    /**
+     * @dev Implements the `peers(uint32 _eid)` function from IOAppCore.
+     *      Returns the stored peer address for the given endpoint ID.
+     * @param _eid The endpoint ID.
+     * @return peer The peer address associated with the given endpoint ID.
+     */
+    function peers(uint32 _eid) public view override returns (bytes32 peer) {
+        return _getOAppCoreStorage().peers[_eid];
+    }
+
+    /**
      * @notice Sets the peer address (OApp instance) for a corresponding endpoint.
      * @param _eid The endpoint ID.
      * @param _peer The address of the peer to be associated with the corresponding endpoint.
