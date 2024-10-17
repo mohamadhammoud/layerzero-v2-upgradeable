@@ -26,7 +26,7 @@ contract OAppUpgradeTest is Test {
         address endpointProxy = Upgrades.deployTransparentProxy(
             "out/EndpointV2.sol/EndpointV2.json",
             msg.sender,
-            abi.encodeCall(EndpointV2.initialize, (uint32(1), msg.sender))
+            abi.encodeCall(EndpointV2.initialize, (uint32(1), address(this)))
         );
 
         // Deploy a transparent proxy with OAppV1 as the implementation
