@@ -4,8 +4,10 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import {OAppV1} from "../src/OAppV1.sol";
 import {OAppV2} from "../src/OAppV2.sol";
+import {EndpointV2} from "../src/EndpointV2.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+
 import "openzeppelin-foundry-upgrades/Upgrades.sol";
 
 /**
@@ -21,11 +23,20 @@ contract OAppUpgradeTest is Test {
     address public delegate;
 
     function testTransparent() public {
+        address endpointProxy = Upgrades.deployTransparentProxy(
+            "out/EndpointV2.sol/EndpointV2.json",
+            msg.sender,
+            abi.encodeCall(EndpointV2.initialize, (uint32(1), msg.sender))
+        );
+
         // Deploy a transparent proxy with OAppV1 as the implementation
         address proxy = Upgrades.deployTransparentProxy(
             "out/OAppV1.sol/OAppV1.json",
             msg.sender,
-            abi.encodeCall(OAppV1.initialize, (address(1), msg.sender))
+            abi.encodeCall(
+                OAppV1.initialize,
+                (address(endpointProxy), msg.sender)
+            )
         );
 
         assertEq(OAppV1(proxy).versionedFunction(), "This is OApp V1");

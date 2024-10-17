@@ -58,7 +58,6 @@ contract EndpointV2 is
     function initialize(uint32 _eid, address _owner) public initializer {
         // Initialize the messaging channel with the endpoint ID
         __MessagingChannel_init(_eid);
-
         __MessageLibManager_init(_owner);
     }
 

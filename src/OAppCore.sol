@@ -33,7 +33,7 @@ abstract contract OAppCore is IOAppCore, Initializable, OwnableUpgradeable {
         address _endpoint,
         address _delegate
     ) public initializer {
-        __Ownable_init(msg.sender); // Initializes the upgradeable Ownable contract
+        __Ownable_init(_delegate); // Initializes the upgradeable Ownable contract
 
         _getOAppCoreStorage().endpoint = ILayerZeroEndpointV2(_endpoint);
         if (_delegate == address(0)) revert InvalidDelegate();
