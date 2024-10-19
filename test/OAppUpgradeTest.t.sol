@@ -1,28 +1,22 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
-import {OAppV1} from "../src/OAppV1.sol";
-import {OAppV2} from "../src/OAppV2.sol";
+import {Test} from "forge-std/Test.sol";
+import {GatewayV1} from "../src/GatewayV1.sol";
+import {GatewayV2} from "../src/GatewayV2.sol";
 import {EndpointV2} from "../src/EndpointV2.sol";
+
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {MessagingFee} from "../src/OAppSender.sol";
 
 import "openzeppelin-foundry-upgrades/Upgrades.sol";
 
-/**
- * @title OAppUpgradeTest
- * @dev Test suite for upgrading OAppV1 to OAppV2 using TransparentUpgradeableProxy.
- */
-contract OAppUpgradeTest is Test {
-    OAppV1 public oAppV1;
-    OAppV2 public oAppV2;
-    // TransparentUpgradeableProxy public proxy;
-    ProxyAdmin public admin;
-    address public owner;
-    address public delegate;
+contract GatewayUpgradeTest is Test {
+    GatewayV1 gatewayV1;
+    GatewayV2 gatewayV2;
 
-    function testTransparent() public {
+    function setUp() public {
         address endpointProxy = Upgrades.deployTransparentProxy(
             "out/EndpointV2.sol/EndpointV2.json",
             msg.sender,
@@ -30,56 +24,47 @@ contract OAppUpgradeTest is Test {
         );
 
         // Deploy a transparent proxy with OAppV1 as the implementation
-        address proxy = Upgrades.deployTransparentProxy(
-            "out/OAppV1.sol/OAppV1.json",
+        address gatewayV1Proxy = Upgrades.deployTransparentProxy(
+            "out/GatewayV1.sol/GatewayV1.json",
             msg.sender,
             abi.encodeCall(
-                OAppV1.initialize,
+                GatewayV1.initialize,
                 (address(endpointProxy), msg.sender)
             )
         );
 
-        assertEq(OAppV1(proxy).versionedFunction(), "This is OApp V1");
+        gatewayV1 = GatewayV1(gatewayV1Proxy);
+    }
 
-        // Get the implementation address of the proxy
-        address implAddrV1 = Upgrades.getImplementationAddress(proxy);
+    function test_initialization() public {
+        assertEq(gatewayV1.versionedFunction(), "This is OApp V1");
+        assertEq(gatewayV1.lastReceivedMessage(), "");
+        assertEq(gatewayV1.lastReceivedSrcEid(), 0);
+        assertEq(gatewayV1.lastSender(), 0x00);
+    }
 
-        // Get the admin address of the proxy
-        address adminAddr = Upgrades.getAdminAddress(proxy);
-
-        // Ensure the admin address is valid
-        assertFalse(adminAddr == address(0));
-
-        // Log the initial version
-        console.log("----------------------------------");
-        console.log(
-            "Value before upgrade --> ",
-            OAppV1(proxy).versionedFunction()
+    function test_upgradeToV2() public {
+        // Get the new implementation address before upgrade
+        address implAddrV1 = Upgrades.getImplementationAddress(
+            address(gatewayV1)
         );
-        console.log("----------------------------------");
 
         // Upgrade the proxy to ContractB
         Upgrades.upgradeProxy(
-            proxy,
-            "out/OAppV2.sol/OAppV2.json",
+            address(gatewayV1),
+            "out/GatewayV2.sol/GatewayV2.json",
             "",
             msg.sender
         );
 
-        assertEq(OAppV1(proxy).versionedFunction(), "This is OApp V2");
+        assertEq(gatewayV1.versionedFunction(), "This is OApp V2");
 
         // Get the new implementation address after upgrade
-        address implAddrV2 = Upgrades.getImplementationAddress(proxy);
+        address implAddrV2 = Upgrades.getImplementationAddress(
+            address(gatewayV1)
+        );
 
         // Verify implementation address has changed
         assertFalse(implAddrV1 == implAddrV2);
-
-        // Log and verify the updated value
-        console.log("----------------------------------");
-        console.log(
-            "Value after upgrade --> ",
-            OAppV1(proxy).versionedFunction()
-        );
-        console.log("----------------------------------");
     }
 }

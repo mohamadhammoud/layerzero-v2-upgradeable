@@ -7,7 +7,9 @@ extra_output = ["storageLayout"]
 ffi = true
 ast = true
 
-
+remappings = [
+    "solidity-bytes-utils/=lib/solidity-bytes-utils/"
+]
 
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
