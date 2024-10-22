@@ -10,11 +10,14 @@ import {Errors} from "./libs/Errors.sol";
 import {BlockedMessageLib} from "./messagelib/BlockedMessageLib.sol";
 
 /**
- * @title MessageLibManager
+ * @title MessageLibManagerUpgradeable
  * @dev Manages message libraries for LayerZero applications, including registration, versioning, and configuration.
  * This contract follows the upgradeable storage pattern using ERC-7201.
  */
-abstract contract MessageLibManager is OwnableUpgradeable, IMessageLibManager {
+abstract contract MessageLibManagerUpgradeable is
+    OwnableUpgradeable,
+    IMessageLibManager
+{
     address private constant DEFAULT_LIB = address(0);
 
     /// @custom:storage-location erc7201:messagelib.manager.storage
@@ -32,7 +35,8 @@ abstract contract MessageLibManager is OwnableUpgradeable, IMessageLibManager {
 
     /// @dev Storage slot for the contract storage
     bytes32 private constant MESSAGELIB_MANAGER_STORAGE_SLOT =
-        keccak256("messagelib.manager.storage");
+        0x504315d93ce9ee49e3122a2e5a1956935a99ba2bd355ba8cd89135957092d300;
+    // keccak256(abi.encode(uint256(keccak256("MessageLibManagerUpgradeable.storage")) - 1)) & ~bytes32(uint256(0xff));
 
     /**
      * @dev Retrieves the storage for the contract using inline assembly.

@@ -8,10 +8,10 @@ import {ILayerZeroReceiver} from "./interfaces/ILayerZeroReceiver.sol";
 import {GUID} from "./libs/GUID.sol";
 import {Transfer} from "./libs/Transfer.sol";
 import {Errors} from "./libs/Errors.sol";
-import {MessagingChannel} from "./MessagingChannel.sol";
-import {MessagingComposer} from "./MessagingComposer.sol";
-import {MessageLibManager} from "./MessageLibManager.sol";
-import {MessagingContext} from "./MessagingContext.sol";
+import {MessagingChannelUpgradeable} from "./MessagingChannelUpgradeable.sol";
+import {MessagingComposerUpgradeable} from "./MessagingComposerUpgradeable.sol";
+import {MessageLibManagerUpgradeable} from "./MessageLibManagerUpgradeable.sol";
+import {MessagingContextUpgradeable} from "./MessagingContextUpgradeable.sol";
 
 /**
  * @title EndpointV2Upgradeable
@@ -20,10 +20,10 @@ import {MessagingContext} from "./MessagingContext.sol";
  */
 contract EndpointV2Upgradeable is
     ILayerZeroEndpointV2,
-    MessagingChannel,
-    MessageLibManager,
-    MessagingComposer,
-    MessagingContext
+    MessagingChannelUpgradeable,
+    MessageLibManagerUpgradeable,
+    MessagingComposerUpgradeable,
+    MessagingContextUpgradeable
 {
     // Define the storage location for EndpointV2, following the namespaced storage pattern.
     bytes32 private constant ENDPOINT_STORAGE_SLOT =
@@ -322,7 +322,11 @@ contract EndpointV2Upgradeable is
     /// @dev assert the caller to either be the oapp or the delegate
     function _assertAuthorized(
         address _oapp
-    ) internal view override(MessagingChannel, MessageLibManager) {
+    )
+        internal
+        view
+        override(MessagingChannelUpgradeable, MessageLibManagerUpgradeable)
+    {
         if (
             msg.sender != _oapp &&
             msg.sender != _getEndpointStorage().delegates[_oapp]

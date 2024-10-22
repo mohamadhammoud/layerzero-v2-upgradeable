@@ -6,13 +6,13 @@ import {IMessagingContext} from "./interfaces/IMessagingContext.sol";
 import {Errors} from "./libs/Errors.sol";
 
 /**
- * @title MessagingContext
+ * @title MessagingContextUpgradeable
  * @dev Abstract contract that serves as a non-reentrancy guard and a source of messaging context.
  *      Provides the ability to capture the remote `eid` and `sender` address during message sends.
  *      Separates the send and receive contexts to allow messaging receipts.
  *      This version follows the upgradeable storage pattern.
  */
-abstract contract MessagingContext is IMessagingContext {
+abstract contract MessagingContextUpgradeable is IMessagingContext {
     /// @custom:storage-location erc7201:messaging.context.storage
     struct MessagingContextStorage {
         uint256 sendContext;
@@ -23,7 +23,8 @@ abstract contract MessagingContext is IMessagingContext {
 
     /// @dev Storage slot where the MessagingContextStorage struct will be stored.
     bytes32 private constant MESSAGING_CONTEXT_STORAGE_SLOT =
-        keccak256("messaging.context.storage");
+        0x58ff08f89c6220426bf63fc727711df6ae6058dbebf921549605f7e7e6056f00;
+    // keccak256(abi.encode(uint256(keccak256("MessagingContextUpgradeable.storage")) - 1)) & ~bytes32(uint256(0xff));
 
     /**
      * @dev Retrieves the storage struct for MessagingContext.

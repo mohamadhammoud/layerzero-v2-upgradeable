@@ -7,12 +7,12 @@ import {Errors} from "./libs/Errors.sol";
 import {GUID} from "./libs/GUID.sol";
 
 /**
- * @title MessagingChannel
+ * @title MessagingChannelUpgradeable
  * @dev Abstract contract providing base functionality for managing message channels in LayerZero communication.
  *      This contract handles nonces and payload hashes for inbound and outbound messages, while using
  *      upgradeable storage with the ERC-7201 namespaced storage pattern.
  */
-abstract contract MessagingChannel is IMessagingChannel {
+abstract contract MessagingChannelUpgradeable is IMessagingChannel {
     /// @notice Represents an empty payload hash.
     bytes32 public constant EMPTY_PAYLOAD_HASH = bytes32(0);
 
@@ -32,7 +32,8 @@ abstract contract MessagingChannel is IMessagingChannel {
 
     /// @dev The constant storage slot where the MessagingChannelStorage struct will be stored.
     bytes32 private constant MESSAGING_CHANNEL_STORAGE_SLOT =
-        keccak256("messaging.channel.storage");
+        0xb8c31507b3d44e9418725b8e763175ad1f85f06142c1c2df99a62b4ed817d000;
+    // keccak256(abi.encode(uint256(keccak256("MessagingChannelUpgradeable.storage")) - 1)) & ~bytes32(uint256(0xff));
 
     /**
      * @dev Initializes the MessagingChannel contract.

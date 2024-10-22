@@ -7,12 +7,12 @@ import {ILayerZeroComposer} from "./interfaces/ILayerZeroComposer.sol";
 import {Errors} from "./libs/Errors.sol";
 
 /**
- * @title MessagingComposer
+ * @title MessagingComposerUpgradeable
  * @dev Abstract contract implementing composition of LayerZero messages.
  *      Uses upgradeable storage for future-proofing and includes message
  *      composition, verification, and delivery functionality.
  */
-abstract contract MessagingComposer is IMessagingComposer {
+abstract contract MessagingComposerUpgradeable is IMessagingComposer {
     /// @dev Represents a message that has not yet been composed.
     bytes32 private constant NO_MESSAGE_HASH = bytes32(0);
 
@@ -27,7 +27,8 @@ abstract contract MessagingComposer is IMessagingComposer {
 
     /// @dev The constant storage slot where the MessagingComposerStorage struct will be stored.
     bytes32 private constant MESSAGING_COMPOSER_STORAGE_SLOT =
-        keccak256("messaging.composer.storage");
+        0xf5c6f4d0e2f311920553abac69ad206600dd27f9a3b397dfac16faf21ee7f300;
+    // keccak256(abi.encode(uint256(keccak256("MessagingComposerUpgradeable.storage")) - 1)) & ~bytes32(uint256(0xff));
 
     /**
      * @dev Retrieves the MessagingComposerStorage using inline assembly.
