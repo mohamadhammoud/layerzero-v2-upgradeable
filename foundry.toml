@@ -10,7 +10,9 @@ ast = true
 remappings = [
     "solidity-bytes-utils/=lib/solidity-bytes-utils/",
     "@layerzerolabs/oapp-evm/=lib/devtools/packages/oapp-evm/",
-    "@layerzerolabs/lz-evm-protocol-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/protocol"
+    "@layerzerolabs/lz-evm-protocol-v2/=lib/layerzero-v2/packages/layerzero-v2/evm/protocol",
+    "@layerzerolabs/lz-evm-v1-0.7/=node_modules/@layerzerolabs/lz-evm-v1-0.7/"
+
 ]
 
 

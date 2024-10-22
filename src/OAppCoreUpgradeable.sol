@@ -39,7 +39,7 @@ abstract contract OAppCoreUpgradeable is
         address _endpoint,
         address _delegate
     ) public initializer {
-        __Ownable_init(_delegate); // Initializes the upgradeable Ownable contract
+        __Ownable_init(); // Initializes the upgradeable Ownable contract
 
         _getOAppCoreUpgradeableStorage().endpoint = ILayerZeroEndpointV2(
             _endpoint

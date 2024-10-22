@@ -58,7 +58,7 @@ abstract contract MessageLibManagerUpgradeable is
      * This replaces the constructor for upgradeable contracts.
      */
     function __MessageLibManager_init(address owner) internal onlyInitializing {
-        __Ownable_init(owner);
+        __Ownable_init();
 
         // Register blocked library in storage.
         MessageLibManagerStorage storage s = _getMessageLibManagerStorage();
