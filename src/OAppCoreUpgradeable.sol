@@ -4,44 +4,52 @@ pragma solidity ^0.8.20;
 
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IOAppCore, ILayerZeroEndpointV2} from "./interfaces/IOAppCore.sol";
+import {IOAppCore} from "./interfaces/IOAppCore.sol";
+import {ILayerZeroEndpointV2} from "./interfaces/ILayerZeroEndpointV2.sol";
 
 /**
- * @title OAppCore
- * @dev Abstract contract implementing the IOAppCore interface with basic OApp configurations.
+ * @title OAppCoreUpgradeable
+ * @dev Abstract contract implementing the IOAppCoreUpgradeable interface with basic OApp configurations.
  *      This contract is upgradeable using OpenZeppelin's upgradeable proxy pattern, with namespaced storage based on ERC-7201.
  */
-abstract contract OAppCore is IOAppCore, Initializable, OwnableUpgradeable {
-    /// @custom:storage-location erc7201:oappcore.endpoint
-    struct OAppCoreStorage {
+abstract contract OAppCoreUpgradeable is
+    IOAppCore,
+    Initializable,
+    OwnableUpgradeable
+{
+    /// @custom:storage-location erc7201:oappcoreUpgradeable.endpoint
+    struct OAppCoreUpgradeableStorage {
         ILayerZeroEndpointV2 endpoint;
         mapping(uint32 => bytes32) peers;
     }
 
     // Storage location constants for ERC-7201
     bytes32 private constant OAPP_CORE_STORAGE_SLOT =
-        0x40ff43bda4a294861a3610cb72c4535f314bf773d0c3f3a8a4627b1f47da8d00;
-    //  keccak256(abi.encode(uint256(keccak256("OAppCore.storage")) - 1)) &
-    //         ~bytes32(uint256(0xff));
+        0x2a68337b99837b5cd9932b5f5cee101ff79e0dda8443ea274eb71f6701cfc400;
+    // keccak256(
+    //     abi.encode(uint256(keccak256("OAppCoreUpgradeable.storage")) - 1)
+    // ) & ~bytes32(uint256(0xff));
 
     /**
-     * @dev Initializes the OAppCore contract with the provided LayerZero endpoint and delegate address.
+     * @dev Initializes the OAppCoreUpgradeable contract with the provided LayerZero endpoint and delegate address.
      * @param _endpoint The address of the LayerZero endpoint contract.
      * @param _delegate The delegate capable of configuring the OApp.
      */
-    function __OAppCore_init(
+    function __OAppCoreUpgradeable_init(
         address _endpoint,
         address _delegate
     ) public initializer {
         __Ownable_init(_delegate); // Initializes the upgradeable Ownable contract
 
-        _getOAppCoreStorage().endpoint = ILayerZeroEndpointV2(_endpoint);
+        _getOAppCoreUpgradeableStorage().endpoint = ILayerZeroEndpointV2(
+            _endpoint
+        );
         if (_delegate == address(0)) revert InvalidDelegate();
-        _getOAppCoreStorage().endpoint.setDelegate(_delegate);
+        _getOAppCoreUpgradeableStorage().endpoint.setDelegate(_delegate);
     }
 
     /**
-     * @dev Implements the `endpoint()` function from IOAppCore.
+     * @dev Implements the `endpoint()` function from IOAppCoreUpgradeable.
      *      Returns the stored LayerZero endpoint instance.
      * @return iEndpoint The LayerZero endpoint contract.
      */
@@ -51,17 +59,17 @@ abstract contract OAppCore is IOAppCore, Initializable, OwnableUpgradeable {
         override
         returns (ILayerZeroEndpointV2 iEndpoint)
     {
-        return _getOAppCoreStorage().endpoint;
+        return _getOAppCoreUpgradeableStorage().endpoint;
     }
 
     /**
-     * @dev Implements the `peers(uint32 _eid)` function from IOAppCore.
+     * @dev Implements the `peers(uint32 _eid)` function from IOAppCoreUpgradeable.
      *      Returns the stored peer address for the given endpoint ID.
      * @param _eid The endpoint ID.
      * @return peer The peer address associated with the given endpoint ID.
      */
     function peers(uint32 _eid) public view override returns (bytes32 peer) {
-        return _getOAppCoreStorage().peers[_eid];
+        return _getOAppCoreUpgradeableStorage().peers[_eid];
     }
 
     /**
@@ -88,7 +96,7 @@ abstract contract OAppCore is IOAppCore, Initializable, OwnableUpgradeable {
      * @dev Peer is a bytes32 to accommodate non-evm chains.
      */
     function _setPeer(uint32 _eid, bytes32 _peer) internal virtual {
-        _getOAppCoreStorage().peers[_eid] = _peer;
+        _getOAppCoreUpgradeableStorage().peers[_eid] = _peer;
         emit PeerSet(_eid, _peer);
     }
 
@@ -101,7 +109,7 @@ abstract contract OAppCore is IOAppCore, Initializable, OwnableUpgradeable {
     function _getPeerOrRevert(
         uint32 _eid
     ) internal view virtual returns (bytes32) {
-        bytes32 peer = _getOAppCoreStorage().peers[_eid];
+        bytes32 peer = _getOAppCoreUpgradeableStorage().peers[_eid];
         if (peer == bytes32(0)) revert NoPeer(_eid);
         return peer;
     }
@@ -114,17 +122,17 @@ abstract contract OAppCore is IOAppCore, Initializable, OwnableUpgradeable {
      * @dev Provides the ability for a delegate to set configs, on behalf of the OApp, directly on the Endpoint contract.
      */
     function setDelegate(address _delegate) public onlyOwner {
-        _getOAppCoreStorage().endpoint.setDelegate(_delegate);
+        _getOAppCoreUpgradeableStorage().endpoint.setDelegate(_delegate);
     }
 
     /**
      * @dev Retrieves the EndpointStorage using inline assembly.
      * @return storageRef Reference to the namespaced EndpointStorage struct.
      */
-    function _getOAppCoreStorage()
+    function _getOAppCoreUpgradeableStorage()
         internal
         pure
-        returns (OAppCoreStorage storage storageRef)
+        returns (OAppCoreUpgradeableStorage storage storageRef)
     {
         assembly {
             storageRef.slot := OAPP_CORE_STORAGE_SLOT

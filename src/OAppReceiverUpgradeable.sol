@@ -3,13 +3,16 @@
 pragma solidity ^0.8.20;
 
 import {IOAppReceiver, Origin} from "./interfaces/IOAppReceiver.sol";
-import {OAppCore} from "./OAppCore.sol";
+import {OAppCoreUpgradeable} from "./OAppCoreUpgradeable.sol";
 
 /**
  * @title OAppReceiver
  * @dev Abstract contract implementing the ILayerZeroReceiver interface and extending OAppCore for OApp receivers.
  */
-abstract contract OAppReceiver is IOAppReceiver, OAppCore {
+abstract contract OAppReceiverUpgradeable is
+    IOAppReceiver,
+    OAppCoreUpgradeable
+{
     // Custom error message for when the caller is not the registered endpoint/
     error OnlyEndpoint(address addr);
 
@@ -79,7 +82,9 @@ abstract contract OAppReceiver is IOAppReceiver, OAppCore {
     function allowInitializePath(
         Origin calldata origin
     ) public view virtual returns (bool) {
-        return _getOAppCoreStorage().peers[origin.srcEid] == origin.sender;
+        return
+            _getOAppCoreUpgradeableStorage().peers[origin.srcEid] ==
+            origin.sender;
     }
 
     /**
@@ -121,7 +126,7 @@ abstract contract OAppReceiver is IOAppReceiver, OAppCore {
         bytes calldata _extraData
     ) public payable virtual {
         // Ensures that only the endpoint can attempt to lzReceive() messages to this OApp.
-        if (address(_getOAppCoreStorage().endpoint) != msg.sender)
+        if (address(_getOAppCoreUpgradeableStorage().endpoint) != msg.sender)
             revert OnlyEndpoint(msg.sender);
 
         // Ensure that the sender matches the expected peer for the source endpoint.

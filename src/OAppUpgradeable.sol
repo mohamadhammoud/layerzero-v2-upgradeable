@@ -2,16 +2,18 @@
 
 pragma solidity ^0.8.20;
 
-import {OAppSender, MessagingFee, MessagingReceipt} from "./OAppSender.sol";
-import {OAppReceiver, Origin} from "./OAppReceiver.sol";
-import {OAppCore} from "./OAppCore.sol";
+import {OAppSenderUpgradeable, MessagingFee, MessagingReceipt} from "./OAppSenderUpgradeable.sol";
+import {OAppReceiverUpgradeable, Origin} from "./OAppReceiverUpgradeable.sol";
 
 /**
  * @title OApp
- * @dev Abstract contract serving as the base for OApp implementation, combining OAppSender and OAppReceiver functionality.
- *      Inherits from OAppSender and OAppReceiver to enable both sending and receiving messages.
+ * @dev Abstract contract serving as the base for OApp implementation, combining OAppSenderUpgradeable and OAppReceiverUpgradeable functionality.
+ *      Inherits from OAppSenderUpgradeable and OAppReceiverUpgradeable to enable both sending and receiving messages.
  */
-abstract contract OApp is OAppSender, OAppReceiver {
+abstract contract OAppUpgradeable is
+    OAppSenderUpgradeable,
+    OAppReceiverUpgradeable
+{
     /**
      * @dev Initializes the OApp with the provided endpoint and delegate.
      * @param _endpoint The address of the LOCAL LayerZero endpoint.
@@ -21,7 +23,7 @@ abstract contract OApp is OAppSender, OAppReceiver {
         address _endpoint,
         address _delegate
     ) public initializer {
-        __OAppCore_init(_endpoint, _delegate); // Initialize the parent OAppCore contract
+        __OAppCoreUpgradeable_init(_endpoint, _delegate); // Initialize the parent OAppCore contract
     }
 
     /**
@@ -33,7 +35,7 @@ abstract contract OApp is OAppSender, OAppReceiver {
         public
         pure
         virtual
-        override(OAppSender, OAppReceiver)
+        override(OAppSenderUpgradeable, OAppReceiverUpgradeable)
         returns (uint64 senderVersion, uint64 receiverVersion)
     {
         return (SENDER_VERSION, RECEIVER_VERSION);

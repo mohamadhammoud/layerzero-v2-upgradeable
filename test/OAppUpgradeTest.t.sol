@@ -4,11 +4,11 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/Test.sol";
 import {GatewayV1} from "../src/GatewayV1.sol";
 import {GatewayV2} from "../src/GatewayV2.sol";
-import {EndpointV2} from "../src/EndpointV2.sol";
+import {EndpointV2Upgradeable} from "../src/EndpointV2Upgradeable.sol";
 
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import {MessagingFee} from "../src/OAppSender.sol";
+import {MessagingFee} from "../src/OAppSenderUpgradeable.sol";
 
 import "openzeppelin-foundry-upgrades/Upgrades.sol";
 
@@ -16,8 +16,8 @@ contract GatewayUpgradeTest is Test {
     GatewayV1 gatewayV1;
     GatewayV1 gatewayV1A;
     GatewayV1 gatewayV1B;
-    EndpointV2 endpointv2A;
-    EndpointV2 endpointv2B;
+    EndpointV2Upgradeable endpointv2A;
+    EndpointV2Upgradeable endpointv2B;
 
     uint32 constant eidA = 1;
     uint32 constant eidB = 2;
@@ -35,13 +35,18 @@ contract GatewayUpgradeTest is Test {
     }
 
     // Function to deploy an EndpointV2
-    function deployEndpoint(uint32 eid) internal returns (EndpointV2) {
+    function deployEndpoint(
+        uint32 eid
+    ) internal returns (EndpointV2Upgradeable) {
         address endpointProxy = Upgrades.deployTransparentProxy(
-            "out/EndpointV2.sol/EndpointV2.json",
+            "out/EndpointV2Upgradeable.sol/EndpointV2Upgradeable.json",
             msg.sender,
-            abi.encodeCall(EndpointV2.initialize, (eid, address(this)))
+            abi.encodeCall(
+                EndpointV2Upgradeable.initialize,
+                (eid, address(this))
+            )
         );
-        return EndpointV2(endpointProxy);
+        return EndpointV2Upgradeable(endpointProxy);
     }
 
     // Function to deploy a GatewayV1

@@ -14,11 +14,11 @@ import {MessageLibManager} from "./MessageLibManager.sol";
 import {MessagingContext} from "./MessagingContext.sol";
 
 /**
- * @title EndpointV2
+ * @title EndpointV2Upgradeable
  * @dev Upgradeable contract for LayerZero EndpointV2 functionality. Handles omnichain messaging, fee management,
  *      and delegate control. Follows the namespaced storage pattern using ERC-7201 for upgradeable storage.
  */
-contract EndpointV2 is
+contract EndpointV2Upgradeable is
     ILayerZeroEndpointV2,
     MessagingChannel,
     MessageLibManager,
@@ -27,7 +27,8 @@ contract EndpointV2 is
 {
     // Define the storage location for EndpointV2, following the namespaced storage pattern.
     bytes32 private constant ENDPOINT_STORAGE_SLOT =
-        keccak256("layerzero.endpoint.storage.v2");
+        0xd875ef2f687a9526a0ec9369765cb9f8e9372b7e5a164edfb1e0c54a665af200;
+    //    keccak256(abi.encode(uint256(keccak256("EndpointV2Upgradeable.storage")) - 1)) & ~bytes32(uint256(0xff));
 
     /// @custom:storage-location erc7201:layerzero.endpoint.storage.v2
     struct EndpointStorage {

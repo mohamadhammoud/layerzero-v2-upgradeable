@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {OAppSender, MessagingFee, MessagingReceipt} from "./OAppSender.sol";
-import {OAppReceiver, Origin} from "./OAppReceiver.sol";
-import {OApp} from "./OApp.sol";
+import {OAppSenderUpgradeable, MessagingFee, MessagingReceipt} from "./OAppSenderUpgradeable.sol";
+import {OAppReceiverUpgradeable, Origin} from "./OAppReceiverUpgradeable.sol";
+import {OAppUpgradeable} from "./OAppUpgradeable.sol";
 
 /**
  * @title GatewayV1
  * @dev Inherits functionality from both OAppSender and OAppReceiver for sending and receiving messages.
  */
-contract GatewayV1 is OApp {
+contract GatewayV1 is OAppUpgradeable {
     // Event to signal that a message was received
     event MessageReceived(uint32 srcEid, bytes32 sender, string message);
 
@@ -62,10 +62,10 @@ contract GatewayV1 is OApp {
         public
         pure
         virtual
-        override(OApp)
+        override(OAppUpgradeable)
         returns (uint64 senderVersion, uint64 receiverVersion)
     {
-        return OApp.oAppVersion();
+        return OAppUpgradeable.oAppVersion();
     }
 
     /**
