@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./OAppUpgradeable.sol";
+import {OAppSenderUpgradeable, MessagingFee, MessagingReceipt} from "../../src/OAppSenderUpgradeable.sol";
+import {OAppReceiverUpgradeable, Origin} from "../../src/OAppReceiverUpgradeable.sol";
+import {OAppUpgradeable} from "../../src/OAppUpgradeable.sol";
 
 /**
- * @title GatewayV2
- * @dev Extension of GatewayV1 with additional functionality.
+ * @title OAppMockUpgradeable
+ * @dev Mock contract for testing OApp functionality, combining OAppSender and OAppReceiver features.
  */
-/// @custom:oz-upgrades-from GatewayV1
-contract GatewayV2 is OAppUpgradeable {
+contract OAppMockUpgradeable is OAppUpgradeable {
     // Event to signal that a message was received
     event MessageReceived(uint32 srcEid, bytes32 sender, string message);
 
@@ -18,7 +19,7 @@ contract GatewayV2 is OAppUpgradeable {
     bytes32 public lastSender; // To store the sender address from the origin
 
     /**
-     * @dev Initializes the GatewayV1 with the provided endpoint and delegate.
+     * @dev Initializes the OAppMock with the provided endpoint and delegate.
      * @param _endpoint The address of the LOCAL LayerZero endpoint.
      * @param _delegate The delegate capable of making OApp configurations inside of the endpoint.
      */
@@ -26,7 +27,7 @@ contract GatewayV2 is OAppUpgradeable {
         address _endpoint,
         address _delegate
     ) public initializer {
-        __OAppCore_init(_endpoint, _delegate); // Initialize the parent OAppCore contract
+        __OApp_init(_endpoint, _delegate); // Initialize the parent OAppCore contract
     }
 
     /**
@@ -53,29 +54,6 @@ contract GatewayV2 is OAppUpgradeable {
     }
 
     /**
-     * @notice Retrieves the OApp version information.
-     * @return senderVersion The version of the OAppSender.sol implementation.
-     * @return receiverVersion The version of the OAppReceiver.sol implementation.
-     */
-    function oAppVersion()
-        public
-        pure
-        virtual
-        override(OAppUpgradeable)
-        returns (uint64 senderVersion, uint64 receiverVersion)
-    {
-        return OAppUpgradeable.oAppVersion();
-    }
-
-    /**
-     * @dev A simple function for V2, this will be updated in V2.
-     * @return string Message from V2 contract.
-     */
-    function versionedFunction() public pure virtual returns (string memory) {
-        return "This is OApp V2";
-    }
-
-    /**
      * @notice Quotes the gas needed to pay for the full omnichain transaction in native gas or ZRO token.
      * @param _dstEid Destination chain's endpoint ID.
      * @param _message The message.
@@ -94,6 +72,21 @@ contract GatewayV2 is OAppUpgradeable {
     }
 
     /**
+     * @notice Retrieves the OApp version information.
+     * @return senderVersion The version of the OAppSender.sol implementation.
+     * @return receiverVersion The version of the OAppReceiver.sol implementation.
+     */
+    function oAppVersion()
+        public
+        pure
+        virtual
+        override(OAppUpgradeable)
+        returns (uint64 senderVersion, uint64 receiverVersion)
+    {
+        return OAppUpgradeable.oAppVersion();
+    }
+
+    /**
      * @dev Receives messages from LayerZero. Implements `_lzReceive` from `OAppReceiver`.
      * @param _origin The origin chain and sender details.
      * @param _guid A globally unique identifier for the message.
@@ -108,7 +101,7 @@ contract GatewayV2 is OAppUpgradeable {
         address _executor,
         bytes calldata _extraData
     ) internal virtual override {
-        // Assuming the message payload is a string, we decode the payload
+        // Decode the received message
         string memory receivedMessage = abi.decode(_message, (string));
 
         // Store the received message and origin details
@@ -116,7 +109,7 @@ contract GatewayV2 is OAppUpgradeable {
         lastReceivedSrcEid = _origin.srcEid;
         lastSender = _origin.sender;
 
-        // You can add additional logic here to process the received message
+        // Emit an event for the received message
         emit MessageReceived(
             _origin.srcEid,
             bytes32(_origin.sender),

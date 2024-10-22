@@ -35,7 +35,7 @@ abstract contract OAppCoreUpgradeable is
      * @param _endpoint The address of the LayerZero endpoint contract.
      * @param _delegate The delegate capable of configuring the OApp.
      */
-    function __OAppCoreUpgradeable_init(
+    function __OAppCore_init(
         address _endpoint,
         address _delegate
     ) public initializer {

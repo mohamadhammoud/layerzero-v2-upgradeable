@@ -23,7 +23,7 @@ abstract contract OAppUpgradeable is
         address _endpoint,
         address _delegate
     ) public initializer {
-        __OAppCoreUpgradeable_init(_endpoint, _delegate); // Initialize the parent OAppCore contract
+        __OAppCore_init(_endpoint, _delegate); // Initialize the parent OAppCore contract
     }
 
     /**
