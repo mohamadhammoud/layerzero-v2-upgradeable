@@ -19,8 +19,6 @@ contract GatewayUpgradeTest is Test {
     TransparentUpgradeableProxy public gatewayProxy;
 
     GatewayV1 public gatewayV1;
-    GatewayV1 public gatewayV1A;
-    GatewayV1 public gatewayV1B;
 
     EndpointV2Upgradeable public endpointA;
     EndpointV2Upgradeable public endpointB;
@@ -34,8 +32,6 @@ contract GatewayUpgradeTest is Test {
         endpointB = _deployEndpoint(eidB);
 
         gatewayV1 = _deployGatewayV1(address(endpointA));
-        gatewayV1A = _deployGatewayV1(address(endpointA));
-        gatewayV1B = _deployGatewayV1(address(endpointB));
     }
 
     /// @notice Deploys an EndpointV2Upgradeable using ERC1967 proxy
