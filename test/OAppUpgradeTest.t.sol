@@ -5,93 +5,88 @@ import {Test} from "forge-std/Test.sol";
 import {GatewayV1} from "../src/GatewayV1.sol";
 import {GatewayV2} from "../src/GatewayV2.sol";
 import {EndpointV2Upgradeable} from "../src/EndpointV2Upgradeable.sol";
-
-import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {MessagingFee} from "../src/OAppSenderUpgradeable.sol";
 
-import "openzeppelin-foundry-upgrades/Upgrades.sol";
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
+/// @title GatewayUpgradeTest
+/// @notice Test suite for deploying and upgrading Gateway contracts using OpenZeppelin proxy
 contract GatewayUpgradeTest is Test {
-    GatewayV1 gatewayV1;
-    GatewayV1 gatewayV1A;
-    GatewayV1 gatewayV1B;
-    EndpointV2Upgradeable endpointv2A;
-    EndpointV2Upgradeable endpointv2B;
+    ProxyAdmin public proxyAdmin;
+    TransparentUpgradeableProxy public gatewayProxy;
+
+    GatewayV1 public gatewayV1;
+
+    EndpointV2Upgradeable public endpointA;
+    EndpointV2Upgradeable public endpointB;
 
     uint32 constant eidA = 1;
     uint32 constant eidB = 2;
 
-    // Setup function that runs before each test
+    /// @notice Deploys ProxyAdmin and necessary endpoints before each test
     function setUp() public {
-        // Deploy endpoints
-        endpointv2A = deployEndpoint(eidA);
-        endpointv2B = deployEndpoint(eidB);
+        endpointA = _deployEndpoint(eidA);
+        endpointB = _deployEndpoint(eidB);
 
-        // Deploy gateways
-        gatewayV1 = deployGateway(address(endpointv2A));
-        gatewayV1A = deployGateway(address(endpointv2A));
-        gatewayV1B = deployGateway(address(endpointv2B));
+        gatewayV1 = _deployGatewayV1(address(endpointA));
     }
 
-    // Function to deploy an EndpointV2
-    function deployEndpoint(
+    /// @notice Deploys an EndpointV2Upgradeable using ERC1967 proxy
+    /// @param eid The unique identifier for the endpoint
+    /// @return The deployed EndpointV2Upgradeable proxy instance
+    function _deployEndpoint(
         uint32 eid
     ) internal returns (EndpointV2Upgradeable) {
-        address endpointProxy = Upgrades.deployTransparentProxy(
-            "out/EndpointV2Upgradeable.sol/EndpointV2Upgradeable.json",
-            msg.sender,
-            abi.encodeCall(
-                EndpointV2Upgradeable.initialize,
-                (eid, address(this))
+        EndpointV2Upgradeable endpoint = EndpointV2Upgradeable(
+            address(
+                new ERC1967Proxy(
+                    address(new EndpointV2Upgradeable()),
+                    abi.encodeCall(
+                        EndpointV2Upgradeable.initialize,
+                        (eid, address(this))
+                    )
+                )
             )
         );
-        return EndpointV2Upgradeable(endpointProxy);
+        return endpoint;
     }
 
-    // Function to deploy a GatewayV1
-    function deployGateway(address endpoint) internal returns (GatewayV1) {
-        address gatewayProxy = Upgrades.deployTransparentProxy(
-            "out/GatewayV1.sol/GatewayV1.json",
-            msg.sender,
-            abi.encodeCall(GatewayV1.initialize, (endpoint, msg.sender))
+    /// @notice Deploys a GatewayV1 contract using ERC1967 proxy and initializes it
+    /// @param endpoint The address of the endpoint associated with the GatewayV1 contract
+    /// @return The deployed GatewayV1 proxy instance
+    function _deployGatewayV1(address endpoint) internal returns (GatewayV1) {
+        GatewayV1 gateway = GatewayV1(
+            address(
+                new ERC1967Proxy(
+                    address(new GatewayV1()),
+                    abi.encodeCall(
+                        GatewayV1.initialize,
+                        (endpoint, address(this))
+                    )
+                )
+            )
         );
-        return GatewayV1(gatewayProxy);
+        return gateway;
     }
 
-    // Test to verify the initial state of the GatewayV1
+    /// @notice Verifies the initial state of the deployed GatewayV1 contract
     function test_initialization() public {
-        // Check if the contract is properly initialized
         assertEq(gatewayV1.versionedFunction(), "This is OApp V1");
         assertEq(gatewayV1.lastReceivedMessage(), "");
         assertEq(gatewayV1.lastReceivedSrcEid(), 0);
-        assertEq(gatewayV1.lastSender(), (0x00));
+        assertEq(gatewayV1.lastSender(), bytes32(0));
     }
 
-    // Test the upgrade from GatewayV1 to GatewayV2
+    /// @notice Tests the upgrade process from GatewayV1 to GatewayV2
     function test_upgradeToV2() public {
-        // Get initial implementation address (before upgrade)
-        address implAddrV1 = Upgrades.getImplementationAddress(
-            address(gatewayV1)
-        );
+        GatewayV2 gatewayV2 = new GatewayV2();
+        address gatewayV2Address = address(gatewayV2);
+        bytes memory data = abi.encodeCall(gatewayV2.versionedFunction, ());
 
-        // Upgrade the proxy to GatewayV2
-        Upgrades.upgradeProxy(
-            address(gatewayV1),
-            "out/GatewayV2.sol/GatewayV2.json",
-            "",
-            msg.sender
-        );
-
-        // Check if the contract is now using the upgraded version
+        GatewayV1(gatewayV1).upgradeToAndCall(gatewayV2Address, data);
         assertEq(gatewayV1.versionedFunction(), "This is OApp V2");
-
-        // Get new implementation address (after upgrade)
-        address implAddrV2 = Upgrades.getImplementationAddress(
-            address(gatewayV1)
-        );
-
-        // Verify that the implementation address has changed after the upgrade
-        assertFalse(implAddrV1 == implAddrV2);
     }
 }

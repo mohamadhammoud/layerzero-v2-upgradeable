@@ -2,13 +2,14 @@
 pragma solidity ^0.8.20;
 
 import "./OAppUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
  * @title GatewayV2
  * @dev Extension of GatewayV1 with additional functionality.
  */
 /// @custom:oz-upgrades-from GatewayV1
-contract GatewayV2 is OAppUpgradeable {
+contract GatewayV2 is OAppUpgradeable, UUPSUpgradeable {
     // Event to signal that a message was received
     event MessageReceived(uint32 srcEid, bytes32 sender, string message);
 
@@ -26,7 +27,7 @@ contract GatewayV2 is OAppUpgradeable {
         address _endpoint,
         address _delegate
     ) public initializer {
-        __OAppCoreUpgradeable_init(_endpoint, _delegate); // Initialize the parent OAppCore contract
+        __OAppCore_init(_endpoint, _delegate); // Initialize the parent OAppCore contract
     }
 
     /**
@@ -123,4 +124,8 @@ contract GatewayV2 is OAppUpgradeable {
             receivedMessage
         );
     }
+
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal virtual override onlyOwner {} // solhint-disable-line
 }

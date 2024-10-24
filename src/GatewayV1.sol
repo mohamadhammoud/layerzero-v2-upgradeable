@@ -4,12 +4,13 @@ pragma solidity ^0.8.20;
 import {OAppSenderUpgradeable, MessagingFee, MessagingReceipt} from "./OAppSenderUpgradeable.sol";
 import {OAppReceiverUpgradeable, Origin} from "./OAppReceiverUpgradeable.sol";
 import {OAppUpgradeable} from "./OAppUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
  * @title GatewayV1
  * @dev Inherits functionality from both OAppSender and OAppReceiver for sending and receiving messages.
  */
-contract GatewayV1 is OAppUpgradeable {
+contract GatewayV1 is OAppUpgradeable, UUPSUpgradeable {
     // Event to signal that a message was received
     event MessageReceived(uint32 srcEid, bytes32 sender, string message);
 
@@ -124,4 +125,8 @@ contract GatewayV1 is OAppUpgradeable {
             receivedMessage
         );
     }
+
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal virtual override onlyOwner {} // solhint-disable-line
 }
